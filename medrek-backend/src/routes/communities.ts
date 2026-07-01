@@ -31,9 +31,9 @@ router.get('/', optionalAuth, async (req: any, res: any) => {
       userRole: membershipMap[c.id] || null
     }))
     res.json(result)
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
-    res.status(500).json({ message: 'Server error' })
+    res.status(500).json({ message: 'Server error', error: err.message || String(err) })
   }
 })
 
@@ -75,9 +75,9 @@ router.get('/my-moderated', protect, async (req: any, res: any) => {
     })
     const communities = memberships.map((m: any) => m.community)
     res.json(communities)
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
-    res.status(500).json({ message: 'Server error' })
+    res.status(500).json({ message: 'Server error', error: err.message || String(err) })
   }
 })
 

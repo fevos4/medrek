@@ -162,9 +162,9 @@ router.get('/:username/communities', optionalAuth, async (req: any, res: any) =>
     }))
 
     res.json(result)
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
-    res.status(500).json({ message: 'Server error' })
+    res.status(500).json({ message: 'Server error', error: err.message || String(err) })
   }
 })
 

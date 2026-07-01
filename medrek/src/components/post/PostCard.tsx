@@ -54,8 +54,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, lang, isMod, onVote })
                 <div className="text-xs text-[#C0392B] px-3 py-2 hover:bg-[#FEF2F2] cursor-pointer" onClick={() => handleModAction(() => modAPI.removePost(post.id), 'Post removed')}>
                   Remove post
                 </div>
-                {!post.isAnonymous && (
-                  <div className="text-xs text-[#C0392B] px-3 py-2 hover:bg-[#FEF2F2] cursor-pointer" onClick={() => handleModAction(() => modAPI.banUser(post.communityId, post.authorId), 'User banned')}>
+                {!post.isAnonymous && post.authorId && (
+                  <div className="text-xs text-[#C0392B] px-3 py-2 hover:bg-[#FEF2F2] cursor-pointer" onClick={() => handleModAction(() => modAPI.banUser(post.communityId, post.authorId!), 'User banned')}>
                     Ban author
                   </div>
                 )}

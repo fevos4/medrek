@@ -3,7 +3,7 @@ export interface Post {
   title: string
   titleAm: string
   author: string
-  authorId: string
+  authorId?: string
   communityId: string
   communityName: string
   communityNameAm: string
@@ -13,8 +13,8 @@ export interface Post {
   isAnonymous: boolean
   isSensitive: boolean
   userVote: 1 | -1 | 0
-  imageUrl: string
-  type: PostType
+  imageUrl?: string
+  type?: PostType
 }
 
 export interface PostDetail extends Post {

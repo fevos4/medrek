@@ -25,7 +25,7 @@ export interface CommunityDetail extends Community {
   createdAt: string
   type: 'public' | 'private' | 'restricted'
   isSensitive: boolean
-  userRole: 'admin' | 'moderator' | 'member' | null
+  userRole?: 'admin' | 'moderator' | 'member' | null
   creatorId?: string
 }
 

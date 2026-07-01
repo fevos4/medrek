@@ -1,0 +1,28 @@
+# ── ENVIRONMENT VARIABLES ──────────────────
+medrek/.env
+medrek/.env.local
+medrek/.env.production
+medrek-backend/.env
+
+# ── FIREBASE PRIVATE KEY ───────────────────
+medrek-backend/firebase-service-account.json
+
+# ── USER UPLOADED IMAGES ───────────────────
+medrek-backend/uploads/
+
+# ── PRISMA GENERATED CLIENT ────────────────
+medrek-backend/generated/
+
+# ── NODE MODULES ───────────────────────────
+node_modules/
+medrek/node_modules/
+medrek-backend/node_modules/
+
+# ── BUILD OUTPUT ───────────────────────────
+medrek/dist/
+medrek-backend/dist/
+
+# ── OS FILES ───────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

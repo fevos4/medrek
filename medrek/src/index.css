@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", sans-serif;
+  --font-ethiopic: "Noto Sans Ethiopic", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}

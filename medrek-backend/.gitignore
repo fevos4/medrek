@@ -1,0 +1,29 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+firebase-service-account.json
+uploads/
+
+# Environment variables — contains your DB password and JWT secret
+.env
+
+# Firebase service account — contains your private Google credentials
+firebase-service-account.json
+
+# Uploaded images — don't push user content to git
+uploads/
+
+# Prisma generated client
+generated/
+
+# Node modules
+node_modules/
+
+# TypeScript compiled output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db

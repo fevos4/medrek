@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  avatarUrl     String?
+  bio           String?
+  karma         Int      @default(0)
+  preferredLang String   @default("en")
+  createdAt     DateTime @default(now())
+
+  // Relations
+  communities      CommunityMember[]
+  createdCommunities Community[]     @relation("CommunityCreator")
+  posts            Post[]
+  comments         Comment[]
+  votes            Vote[]
+  reports          Report[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+model Community {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  nameAm        String?
+  description   String
+  descriptionAm String?
+  type          String   @default("public") // public | private | restricted
+  isSensitive   Boolean  @default(false)
+  memberCount   Int      @default(0)
+  creatorId     String
+  createdAt     DateTime @default(now())
+
+  // Relations
+  creator  User              @relation("CommunityCreator", fields: [creatorId], references: [id])
+  members  CommunityMember[]
+  posts    Post[]
+  rules    CommunityRule[]
+
+  @@map("communities")
+}
+
+model CommunityRule {
+  id          String @id @default(uuid())
+  number      Int
+  text        String
+  textAm      String?
+  communityId String
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@map("community_rules")
+}
+
+model CommunityMember {
+  id          String   @id @default(uuid())
+  userId      String
+  communityId String
+  role        String   @default("member") // member | moderator | admin
+  joinedAt    DateTime @default(now())
+  isMuted     Boolean  @default(false)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@map("community_members")
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  title       String
+  titleAm     String?
+  content     String?
+  contentAm   String?
+  type        String   @default("text") // text | link | image
+  url         String?
+  imageUrl    String?
+  score       Int      @default(0)
+  commentCount Int     @default(0)
+  isAnonymous Boolean  @default(false)
+  isRemoved   Boolean  @default(false)
+  authorId    String
+  communityId String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  author    User      @relation(fields: [authorId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
+  comments  Comment[]
+  votes     Vote[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  content     String
+  contentAm   String?
+  score       Int      @default(0)
+  isAnonymous Boolean  @default(false)
+  isRemoved   Boolean  @default(false)
+  authorId    String
+  postId      String
+  parentId    String?  // null = top-level, set = reply to another comment
+  createdAt   DateTime @default(now())
+
+  // Relations
+  author   User      @relation(fields: [authorId], references: [id])
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+  votes    Vote[]
+
+  @@map("comments")
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  value      Int      // +1 or -1
+  userId     String
+  targetId   String   // post id or comment id
+  targetType String   // "post" or "comment"
+  postId     String?
+  commentId  String?
+  createdAt  DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetId, targetType])
+  @@map("votes")
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  targetId    String
+  targetType  String   // "post" or "comment"
+  reason      String   // ethnic_hate | religious_disrespect | misinformation | harassment | spam | other
+  detail      String?
+  status      String   @default("pending") // pending | resolved | dismissed
+  reporterId  String
+  createdAt   DateTime @default(now())
+
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@map("reports")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String   // reply_post | reply_comment | mod_action | join_group
+  content   String
+  link      String
+  isRead    Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const { prisma } = require('../lib/prisma')
-const { admin } = require('../lib/firebaseAdmin')
+const { getAdmin } = require('../lib/firebaseAdmin')
 
 const router = express.Router()
 
@@ -17,7 +17,6 @@ router.post('/register', async (req: any, res: any) => {
       return res.status(400).json({ message: 'Username, email and password are required' })
     }
 
-    // Check if user exists
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { username }] }
     })
@@ -25,22 +24,19 @@ router.post('/register', async (req: any, res: any) => {
       return res.status(400).json({ message: 'Username or email already taken' })
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 12)
 
-    // Create user
     const user = await prisma.user.create({
       data: { username, email, passwordHash, preferredLang: preferredLang || 'en' }
     })
 
-    // Generate token
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     )
 
-    res.status(201).json({
+    return res.status(201).json({
       token,
       user: {
         id: user.id,
@@ -52,7 +48,7 @@ router.post('/register', async (req: any, res: any) => {
     })
   } catch (err) {
     console.error(err)
-    res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error' })
   }
 })
 
@@ -65,7 +61,6 @@ router.post('/login', async (req: any, res: any) => {
       return res.status(400).json({ message: 'Email/username and password are required' })
     }
 
-    // Find user
     const user = await prisma.user.findFirst({
       where: {
         OR: [
@@ -79,20 +74,18 @@ router.post('/login', async (req: any, res: any) => {
       return res.status(400).json({ message: 'Invalid credentials' })
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.passwordHash)
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' })
     }
 
-    // Generate token
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     )
 
-    res.json({
+    return res.json({
       token,
       user: {
         id: user.id,
@@ -104,7 +97,7 @@ router.post('/login', async (req: any, res: any) => {
     })
   } catch (err) {
     console.error(err)
-    res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error' })
   }
 })
 
@@ -124,9 +117,9 @@ router.get('/me', require('../middleware/auth').protect, async (req: any, res: a
         createdAt: true
       }
     })
-    res.json(user)
+    return res.json(user)
   } catch (err) {
-    res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error' })
   }
 })
 
@@ -139,7 +132,12 @@ router.post('/google', async (req: any, res: any) => {
       return res.status(400).json({ message: 'No token provided' })
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken)
+    const firebaseAdmin = getAdmin()
+    if (!firebaseAdmin) {
+      return res.status(503).json({ message: 'Google sign-in temporarily unavailable' })
+    }
+
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken)
     const { email, name, picture, uid } = decodedToken
 
     if (!email) {
@@ -184,7 +182,7 @@ router.post('/google', async (req: any, res: any) => {
       { expiresIn: '7d' }
     )
 
-    res.json({
+    return res.json({
       token,
       user: {
         id: user.id,
@@ -197,11 +195,11 @@ router.post('/google', async (req: any, res: any) => {
     })
   } catch (err: any) {
     console.error('Firebase Google auth error:', err)
-    res.status(401).json({ message: 'Google authentication failed' })
+    return res.status(401).json({ message: 'Google authentication failed' })
   }
 })
 
-// GET /api/auth/google
+// GET /api/auth/google — OAuth flow (legacy, kept for reference)
 router.get('/google', (req: any, res: any) => {
   if (!process.env.GOOGLE_CLIENT_ID) {
     return res.status(500).json({ message: 'Google OAuth is not configured' })
@@ -214,7 +212,7 @@ router.get('/google', (req: any, res: any) => {
     `&response_type=code` +
     `&scope=${encodeURIComponent('openid email profile')}` +
     `&state=${state}`
-  res.redirect(url)
+  return res.redirect(url)
 })
 
 // GET /api/auth/google/callback
@@ -292,7 +290,7 @@ router.get('/google/callback', async (req: any, res: any) => {
       avatarUrl: user.avatarUrl
     }
 
-    res.send(`
+    return res.send(`
       <html><body>
       <script>
         window.opener.postMessage({ token: "${token}", user: ${JSON.stringify(userData)} }, "${frontendUrl}");
@@ -302,7 +300,7 @@ router.get('/google/callback', async (req: any, res: any) => {
     `)
   } catch (err) {
     console.error('Google callback error:', err)
-    res.redirect(`${frontendUrl}/login?error=google_auth_failed`)
+    return res.redirect(`${frontendUrl}/login?error=google_auth_failed`)
   }
 })
 

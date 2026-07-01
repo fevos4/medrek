@@ -1,12 +1,32 @@
-const firebaseAdmin = require('firebase-admin')
+let admin: any = null
 
-if (!firebaseAdmin.apps.length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT_JSON!
-  )
-  firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert(serviceAccount)
-  })
+function getAdmin() {
+  if (admin) return admin
+  
+  try {
+    const firebaseAdmin = require('firebase-admin')
+    
+    if (firebaseAdmin.apps && firebaseAdmin.apps.length > 0) {
+      admin = firebaseAdmin
+      return admin
+    }
+
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+    if (!serviceAccountJson) {
+      console.warn('FIREBASE_SERVICE_ACCOUNT_JSON not set — Google auth disabled')
+      return null
+    }
+
+    const serviceAccount = JSON.parse(serviceAccountJson)
+    firebaseAdmin.initializeApp({
+      credential: firebaseAdmin.credential.cert(serviceAccount)
+    })
+    admin = firebaseAdmin
+    return admin
+  } catch (err) {
+    console.error('Firebase Admin init error:', err)
+    return null
+  }
 }
 
-module.exports = { admin: firebaseAdmin }
+module.exports = { getAdmin }

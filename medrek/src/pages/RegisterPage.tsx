@@ -30,6 +30,7 @@ export const RegisterPage: React.FC = () => {
       const data = await authAPI.googleLogin(idToken);
       login(data.token, data.user);
       navigate('/');
+    } catch (err: any) {
       console.error('Google sign-in error:', err);
       setGoogleError(err.message || 'Google sign-in failed. Please try again.');
     } finally {

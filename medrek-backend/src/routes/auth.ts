@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const { prisma } = require('../lib/prisma')
-const { getAdmin } = require('../lib/firebaseAdmin')
+import { getAdmin } from '../lib/firebaseAdmin'
 
 const router = express.Router()
 

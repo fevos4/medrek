@@ -1,15 +1,19 @@
-let admin: any = null
+const firebaseAdminModule = require('firebase-admin')
 
-function getAdmin() {
-  if (admin) return admin
-  
+// firebase-admin v14 exports these at the top level
+const { initializeApp, getApps, cert } = firebaseAdminModule
+
+let adminAuth: any = null
+
+export function getAdmin() {
+  if (adminAuth) return adminAuth
+
   try {
-    const rawFirebaseAdmin = require('firebase-admin')
-    const firebaseAdmin = rawFirebaseAdmin.default || rawFirebaseAdmin
-    
-    if (firebaseAdmin.apps && firebaseAdmin.apps.length > 0) {
-      admin = firebaseAdmin
-      return admin
+    // Already initialized — reuse the existing app
+    if (getApps().length > 0) {
+      const { getAuth } = require('firebase-admin/auth')
+      adminAuth = { auth: () => getAuth() }
+      return adminAuth
     }
 
     const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
@@ -19,15 +23,13 @@ function getAdmin() {
     }
 
     const serviceAccount = JSON.parse(serviceAccountJson)
-    firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert(serviceAccount)
-    })
-    admin = firebaseAdmin
-    return admin
+    initializeApp({ credential: cert(serviceAccount) })
+
+    const { getAuth } = require('firebase-admin/auth')
+    adminAuth = { auth: () => getAuth() }
+    return adminAuth
   } catch (err) {
     console.error('Firebase Admin init error:', err)
     return null
   }
 }
-
-module.exports = { getAdmin }

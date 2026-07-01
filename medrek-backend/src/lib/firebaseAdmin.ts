@@ -4,7 +4,8 @@ function getAdmin() {
   if (admin) return admin
   
   try {
-    const firebaseAdmin = require('firebase-admin')
+    const rawFirebaseAdmin = require('firebase-admin')
+    const firebaseAdmin = rawFirebaseAdmin.default || rawFirebaseAdmin
     
     if (firebaseAdmin.apps && firebaseAdmin.apps.length > 0) {
       admin = firebaseAdmin

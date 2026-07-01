@@ -1,13 +1,12 @@
-const { initializeApp, getApps, cert } = require('firebase-admin/app')
-const { getAuth } = require('firebase-admin/auth')
-const path = require('path')
+const admin = require('firebase-admin')
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(__dirname, '../../firebase-service-account.json')
-    )
+if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON!
+  )
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
   })
 }
 
-module.exports = { admin: { auth: getAuth } }
+module.exports = { admin }

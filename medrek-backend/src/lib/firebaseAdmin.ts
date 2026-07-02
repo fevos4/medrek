@@ -5,7 +5,7 @@ const { initializeApp, getApps, cert } = firebaseAdminModule
 
 let adminAuth: any = null
 
-export function getAdmin() {
+function getAdmin() {
   if (adminAuth) return adminAuth
 
   try {
@@ -33,3 +33,5 @@ export function getAdmin() {
     return null
   }
 }
+
+module.exports = { getAdmin }

@@ -1,5 +1,4 @@
 const express = require('express')
-const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 require('dotenv').config()
@@ -9,27 +8,35 @@ const app = express()
 // Trust Render's reverse proxy for correct rate-limiting
 app.set('trust proxy', 1)
 
-// Fix COOP issue that blocks Google sign-in popup
+// Disable all Helmet security headers that block cross-origin browser requests
 app.use(helmet({
-  crossOriginOpenerPolicy: false
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: false
 }))
 
+// Manual CORS — Express 5 uses path-to-regexp v8 which doesn't support bare '*' routes
 const allowedOrigins = [
   'http://localhost:5173',
   'https://medrek.vercel.app',
   'https://medrek-five.vercel.app'
 ]
-
-app.use(cors({
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true
-}))
+app.use((req: any, res: any, next: any) => {
+  const origin = req.headers.origin
+  if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app'))) {
+    res.header('Access-Control-Allow-Origin', origin)
+    res.header('Access-Control-Allow-Credentials', 'true')
+  } else if (origin) {
+    res.header('Access-Control-Allow-Origin', origin)
+  } else {
+    res.header('Access-Control-Allow-Origin', '*')
+  }
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+  if (req.method === 'OPTIONS') return res.sendStatus(200)
+  next()
+})
 
 app.use(express.json())
 

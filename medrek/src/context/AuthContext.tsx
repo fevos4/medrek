@@ -55,6 +55,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setToken(null);
     setUser(null);
+    window.location.href = '/'  // hard redirect to home
   };
 
   return (

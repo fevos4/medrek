@@ -6,17 +6,28 @@ require('dotenv').config()
 
 const app = express()
 
+// Trust Render's reverse proxy for correct rate-limiting
+app.set('trust proxy', 1)
+
 // Fix COOP issue that blocks Google sign-in popup
 app.use(helmet({
   crossOriginOpenerPolicy: false
 }))
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://medrek.vercel.app',
+  'https://medrek-five.vercel.app'
+]
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://medrek.vercel.app',
-    process.env.FRONTEND_URL || ''
-  ].filter(Boolean),
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true
 }))
 

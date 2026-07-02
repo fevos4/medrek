@@ -1,19 +1,27 @@
 const express = require('express')
 const cors = require('cors')
-const path = require('path')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 require('dotenv').config()
 
 const app = express()
 
-// Middleware
-app.use(cors())
-app.use(express.json())
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
-app.use(helmet())
+// Fix COOP issue that blocks Google sign-in popup
+app.use(helmet({
+  crossOriginOpenerPolicy: false
+}))
 
-// Rate limit auth routes — prevents brute force
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://medrek.vercel.app',
+    process.env.FRONTEND_URL || ''
+  ].filter(Boolean),
+  credentials: true
+}))
+
+app.use(express.json())
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -22,19 +30,18 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authLimiter)
 
-// Routes
 app.use('/api/auth', require('./routes/auth'))
-app.use('/api/users', require('./routes/users'))
 app.use('/api/communities', require('./routes/communities'))
 app.use('/api/posts', require('./routes/posts'))
 app.use('/api/comments', require('./routes/comments'))
 app.use('/api/votes', require('./routes/votes'))
 app.use('/api/reports', require('./routes/reports'))
 app.use('/api/notifications', require('./routes/notifications'))
-app.use('/api/stats', require('./routes/stats'))
 app.use('/api/upload', require('./routes/upload'))
+app.use('/api/stats', require('./routes/stats'))
+app.use('/api/users', require('./routes/users'))
+app.use('/uploads', express.static(require('path').join(__dirname, '../uploads')))
 
-// Health check
 app.get('/api/health', (req: any, res: any) => {
   res.json({ status: 'Medrek API is running' })
 })

@@ -14,7 +14,7 @@ export const CreateCommunityPage: React.FC = () => {
   const [lang, setLang] = useState<Language>('en');
   const [form, setForm] = useState<CreateCommunityForm>({
     name: '', nameAm: '', description: '', descriptionAm: '',
-    type: 'public', isSensitive: false, icon: '🌍', rules: [],
+    type: 'public', isSensitive: false, icon: '🌍', emoji: '🌍', rules: [],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,7 +97,7 @@ export const CreateCommunityPage: React.FC = () => {
             <div className="mb-4">
               <IconPicker
                 value={form.icon}
-                onChange={v => setForm(prev => ({ ...prev, icon: v }))}
+                onChange={(v: string) => setForm(prev => ({ ...prev, icon: v, emoji: v }))}
                 lang={lang}
                 onImageSelect={handleIconSelect}
                 imagePreview={iconPreview}

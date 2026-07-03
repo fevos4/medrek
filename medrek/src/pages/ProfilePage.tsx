@@ -12,6 +12,7 @@ import { EditProfileModal } from '../components/profile/EditProfileModal';
 import { formatUsername } from '../lib/format';
 import { usersAPI, votesAPI, communitiesAPI, mapPost, mapProfile, mapCommunity } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -111,9 +112,7 @@ export const ProfilePage: React.FC = () => {
     return (
       <div className="flex flex-col h-screen font-sans bg-[#F2E9DF] overflow-y-auto">
         <Navbar lang={lang} onToggleLang={() => setLang(l => l === 'en' ? 'am' : 'en')} />
-        <div className="flex items-center justify-center py-16">
-          <div className="text-[#9C836A] text-sm">{lang === 'en' ? 'Loading profile...' : 'መገለጫ በመጫን ላይ...'}</div>
-        </div>
+        <LoadingSpinner text={lang === 'en' ? 'Loading profile...' : 'መገለጫ በመጫን ላይ...'} />
       </div>
     );
   }
@@ -190,8 +189,8 @@ export const ProfilePage: React.FC = () => {
                         className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                         onClick={() => navigate(`/community/${c.id}`)}
                       >
-                        <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white text-sm" style={{ backgroundColor: c.iconBg }}>
-                          {c.icon}
+                        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center font-bold text-white text-sm" style={{ backgroundColor: c.iconBg }}>
+                          {c.iconUrl ? <img src={c.iconUrl} alt="" className="w-full h-full object-cover" /> : c.icon}
                         </div>
                         <div className="min-w-0">
                           <h3 className="text-sm font-bold text-[#1A0F00] truncate">{lang === 'en' ? c.name : (c.nameAm || c.name)}</h3>

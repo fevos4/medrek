@@ -7,6 +7,9 @@ export interface Community {
   memberCount: number
   isJoined: boolean
   isMuted?: boolean
+  iconUrl?: string
+  bannerUrl?: string
+  emoji?: string
 }
 
 export interface CommunityRule {
@@ -27,6 +30,9 @@ export interface CommunityDetail extends Community {
   isSensitive: boolean
   userRole?: 'admin' | 'moderator' | 'member' | null
   creatorId?: string
+  iconUrl?: string
+  bannerUrl?: string
+  emoji?: string
 }
 
 export interface CreateCommunityForm {
@@ -38,4 +44,11 @@ export interface CreateCommunityForm {
   isSensitive: boolean
   icon: string
   rules: string[]
+  iconFile?: File | null
+  iconPreview?: string
+  bannerFile?: File | null
+  bannerPreview?: string
+  iconUrl?: string
+  bannerUrl?: string
+  emoji: string
 }

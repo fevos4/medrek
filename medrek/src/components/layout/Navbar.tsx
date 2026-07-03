@@ -12,9 +12,10 @@ interface NavbarProps {
   onToggleLang: () => void;
   onLogin?: () => void;
   onSignup?: () => void;
+  transparent?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onSignup }) => {
+export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onSignup, transparent }) => {
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,11 +35,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
 
   return (
     <>
-      <nav className="bg-[#1A0F00] h-14 px-4 flex items-center gap-4 sticky top-0 z-50">
-        <button className="text-[#9C836A] hover:text-white md:hidden text-xl" onClick={() => setMenuOpen(true)}>☰</button>
+      <nav className={`${transparent ? 'absolute top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm text-white' : 'bg-[#1A0F00] sticky top-0 z-50'} h-14 px-4 flex items-center gap-4`}>
+        <button className={`${transparent ? 'text-white' : 'text-[#9C836A]'} hover:text-white md:hidden text-xl`} onClick={() => setMenuOpen(true)}>☰</button>
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <img src="/new_logo.png" alt="Medrek" className="w-14 h-14" />
-          <span className="text-[#A8692A] text-base font-ethiopic leading-tight">መድረክ</span>
+          <span className={`${transparent ? 'text-white' : 'text-[#A8692A]'} text-base font-ethiopic leading-tight`}>መድረክ</span>
         </div>
         <div className="flex-1" />
         <div className="flex items-center justify-end">
@@ -136,7 +137,11 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
               <div className="flex flex-col gap-1">
                 {communities.map(c => (
                   <div key={c.id} className="flex items-center gap-3 px-3 py-2 rounded-[7px] text-[#5C4A32] hover:bg-[#F2E0C8] cursor-pointer" onClick={() => { navigate(`/community/${c.id}`); setMenuOpen(false); }}>
-                    <div className="w-5 h-5 rounded flex items-center justify-center text-[9px] flex-shrink-0" style={{ backgroundColor: c.iconBg }}>{c.icon}</div>
+                    {c.iconUrl ? (
+                      <img src={c.iconUrl} alt="" className="w-5 h-5 rounded flex-shrink-0 object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded flex items-center justify-center text-[9px] flex-shrink-0" style={{ backgroundColor: c.iconBg }}>{c.icon}</div>
+                    )}
                     <span className="text-sm">{c.name}</span>
                   </div>
                 ))}

@@ -6,6 +6,7 @@ import { ModStatCard } from '../components/mod/ModStatCard';
 import { ReportCard } from '../components/mod/ReportCard';
 import { BannedUserCard } from '../components/mod/BannedUserCard';
 import { communitiesAPI, reportsAPI } from '../lib/api';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 type StatusFilter = 'all' | 'pending' | 'resolved' | 'dismissed';
 
@@ -97,9 +98,7 @@ export const ModDashboardPage: React.FC = () => {
     return (
       <div className="flex flex-col h-screen font-sans bg-[#F2E9DF]">
         <Navbar lang={lang} onToggleLang={() => setLang(l => l === 'en' ? 'am' : 'en')} onLogin={() => navigate('/login')} onSignup={() => navigate('/register')} />
-        <div className="flex items-center justify-center flex-1">
-          <p className="text-sm text-[#9C836A]">{lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'}</p>
-        </div>
+        <LoadingSpinner text={lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'} />
       </div>
     );
   }

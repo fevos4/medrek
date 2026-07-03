@@ -10,6 +10,7 @@ import { CommentThread } from '../components/comment/CommentThread';
 import { postsAPI, votesAPI } from '../lib/api';
 import { mapPostDetail, mapComment } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 const updateCommentVote = (comments: Comment[], id: string, newValue: 1 | -1 | 0, scoreDiff: number): Comment[] =>
   comments.map(c => {
@@ -130,9 +131,7 @@ export const PostPage: React.FC = () => {
     return (
       <div className="flex flex-col h-screen font-sans bg-[#F2E9DF] overflow-hidden">
         <Navbar lang={lang} onToggleLang={() => setLang(l => l === 'en' ? 'am' : 'en')} />
-        <div className="flex items-center justify-center py-16">
-          <div className="text-[#9C836A] text-sm">{lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'}</div>
-        </div>
+        <LoadingSpinner text={lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'} />
       </div>
     );
   }

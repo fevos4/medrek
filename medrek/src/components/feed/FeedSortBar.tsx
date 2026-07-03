@@ -1,13 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { SortOption, Language } from '../../types';
 
 interface FeedSortBarProps {
   activeSort: SortOption;
   onSortChange: (sort: SortOption) => void;
   lang: Language;
+  communityId?: string;
 }
 
-export const FeedSortBar: React.FC<FeedSortBarProps> = ({ activeSort, onSortChange, lang }) => {
+export const FeedSortBar: React.FC<FeedSortBarProps> = ({ activeSort, onSortChange, lang, communityId }) => {
+  const navigate = useNavigate();
   const options: { id: SortOption; en: string; am: string; icon: string }[] = [
     { id: 'hot', en: 'Hot', am: 'ሞቃት', icon: '🔥' },
     { id: 'new', en: 'New', am: 'አዲስ', icon: '✨' },
@@ -16,7 +19,7 @@ export const FeedSortBar: React.FC<FeedSortBarProps> = ({ activeSort, onSortChan
   ];
 
   return (
-    <div className="bg-white border border-[#DDD0BE] rounded-[9px] p-2 flex items-center gap-1 mb-2">
+    <div className="bg-white border border-[#DDD0BE] rounded-[9px] p-2 flex items-center gap-1">
       {options.map((opt, idx) => (
         <React.Fragment key={opt.id}>
           <button
@@ -32,6 +35,14 @@ export const FeedSortBar: React.FC<FeedSortBarProps> = ({ activeSort, onSortChan
           )}
         </React.Fragment>
       ))}
+      <div className="flex-1" />
+      <button
+        onClick={() => navigate(communityId ? `/create-post?communityId=${communityId}` : '/create-post')}
+        className="text-xs font-semibold px-3 py-1.5 rounded bg-[#6B3F00] text-white hover:bg-[#4A2C00] transition-colors flex items-center gap-1"
+      >
+        <span className="md:hidden">+</span>
+        <span className="hidden md:inline">{lang === 'en' ? 'Create Post' : 'ልጥፍ ጻፍ'}</span>
+      </button>
     </div>
   );
 };

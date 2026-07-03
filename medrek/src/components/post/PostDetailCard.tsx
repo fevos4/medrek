@@ -4,6 +4,7 @@ import { formatUsername } from '../../lib/format';
 import { CommunityPill } from '../community/CommunityPill';
 import { Badge } from '../ui/Badge';
 import { ReportModal } from '../ui/ReportModal';
+import { ShareModal } from '../ui/ShareModal';
 
 interface PostDetailCardProps {
   post: PostDetail;
@@ -13,6 +14,7 @@ interface PostDetailCardProps {
 
 export const PostDetailCard: React.FC<PostDetailCardProps> = ({ post, lang, onVote }) => {
   const [showReport, setShowReport] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [reported, setReported] = useState(false);
   const upColor = post.userVote === 1 ? 'text-[#5A7A2A]' : 'text-[#9C836A]';
   const downColor = post.userVote === -1 ? 'text-[#C0392B]' : 'text-[#9C836A]';
@@ -60,7 +62,7 @@ export const PostDetailCard: React.FC<PostDetailCardProps> = ({ post, lang, onVo
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
           <span>{lang === 'en' ? `${post.commentCount} comments` : `${post.commentCount} አስተያየቶች`}</span>
         </button>
-        <button className="flex items-center gap-1 text-[#9C836A] text-xs hover:text-[#4A2C00] px-2 py-1 rounded transition-colors">
+        <button className="flex items-center gap-1 text-[#9C836A] text-xs hover:text-[#4A2C00] px-2 py-1 rounded transition-colors" onClick={() => setShowShare(true)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
           <span>{lang === 'en' ? 'Share' : 'አጋራ'}</span>
         </button>
@@ -79,6 +81,12 @@ export const PostDetailCard: React.FC<PostDetailCardProps> = ({ post, lang, onVo
         lang={lang}
         onSubmit={form => { console.log('Report submitted:', form); setReported(true); setShowReport(false); }}
         onClose={() => setShowReport(false)}
+      />
+      <ShareModal
+        isOpen={showShare}
+        url={window.location.origin + '/post/' + post.id}
+        lang={lang}
+        onClose={() => setShowShare(false)}
       />
     </div>
   );

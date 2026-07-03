@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Post, Language } from '../../types';
 import { CommunityPill } from '../community/CommunityPill';
 import { Badge } from '../ui/Badge';
 import { ReportModal } from '../ui/ReportModal';
 import { PostActions } from './PostActions';
+import { ShareModal } from '../ui/ShareModal';
 import { formatUsername } from '../../lib/format';
 import { modAPI } from '../../lib/api';
 
@@ -16,9 +17,10 @@ interface PostCardProps {
   onVote: (postId: string, value: 1 | -1 | 0) => void;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post, lang, isMod, onVote }) => {
+export const PostCard: React.FC<PostCardProps> = memo(({ post, lang, isMod, onVote }) => {
   const navigate = useNavigate();
   const [showReport, setShowReport] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [reported, setReported] = useState(false);
   const [showModMenu, setShowModMenu] = useState(false);
   const [removed, setRemoved] = useState(false);
@@ -94,6 +96,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, lang, isMod, onVote })
             userVote={post.userVote}
             onUpvote={() => onVote(post.id, 1)}
             onDownvote={() => onVote(post.id, -1)}
+            onShare={() => setShowShare(true)}
             onReport={() => setShowReport(true)}
           />
         </div>
@@ -105,6 +108,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, lang, isMod, onVote })
         onSubmit={form => { console.log('Report submitted:', form); setReported(true); }}
         onClose={() => setShowReport(false)}
       />
+      <ShareModal
+        isOpen={showShare}
+        url={window.location.origin + '/post/' + post.id}
+        lang={lang}
+        onClose={() => setShowShare(false)}
+      />
     </>
   );
-};
+});

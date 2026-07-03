@@ -7,7 +7,7 @@ import { CommunityTypeSelector } from '../components/community/CommunityTypeSele
 import { IconPicker } from '../components/community/IconPicker';
 import { RulesBuilder } from '../components/community/RulesBuilder';
 import { Button } from '../components/ui/Button';
-import { communitiesAPI } from '../lib/api';
+import { communitiesAPI, uploadAPI } from '../lib/api';
 
 export const CreateCommunityPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +18,23 @@ export const CreateCommunityPage: React.FC = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconPreview, setIconPreview] = useState<string>('');
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
+
+  const handleIconSelect = (file: File) => {
+    setIconFile(file);
+    setIconPreview(URL.createObjectURL(file));
+  };
+
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
@@ -28,14 +45,30 @@ export const CreateCommunityPage: React.FC = () => {
     if (Object.keys(newErrors).length > 0) return;
     try {
       setIsSubmitting(true);
+      let iconUrl = '';
+      let bannerUrl = '';
+      if (iconFile) {
+        setUploading(true);
+        const result = await uploadAPI.uploadImage(iconFile);
+        iconUrl = result.imageUrl;
+      }
+      if (bannerFile) {
+        setUploading(true);
+        const result = await uploadAPI.uploadImage(bannerFile);
+        bannerUrl = result.imageUrl;
+      }
+      setUploading(false);
       const created = await communitiesAPI.create({
         name: form.name,
-        nameAm: form.nameAm,
+        nameAm: form.nameAm || undefined,
         description: form.description,
-        descriptionAm: form.descriptionAm,
+        descriptionAm: form.descriptionAm || undefined,
         type: form.type,
         isSensitive: form.isSensitive,
-        rules: form.rules.map(r => ({ text: r }))
+        rules: form.rules.map(r => ({ text: r })),
+        iconUrl: iconUrl || undefined,
+        bannerUrl: bannerUrl || undefined,
+        emoji: form.icon || undefined
       });
       navigate(`/community/${created.id}`);
     } catch (err: any) {
@@ -61,7 +94,15 @@ export const CreateCommunityPage: React.FC = () => {
               <span className="text-sm font-bold text-[#1A0F00]">{lang === 'en' ? 'Community identity' : 'ማንነት'}</span>
               <span className="text-xs text-[#9C836A] font-['Noto_Sans_Ethiopic']">{lang === 'en' ? '' : 'ማንነት'}</span>
             </div>
-            <IconPicker selected={form.icon} onChange={icon => setForm({ ...form, icon })} lang={lang} />
+            <div className="mb-4">
+              <IconPicker
+                value={form.icon}
+                onChange={v => setForm(prev => ({ ...prev, icon: v }))}
+                lang={lang}
+                onImageSelect={handleIconSelect}
+                imagePreview={iconPreview}
+              />
+            </div>
             <PostFormField label="Community name (English)" labelAm="ማህበረሰብ ስም (እንግሊዝኛ)" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="e.g. Tech Ethiopia, Food & Culture..." lang={lang} multiline={false} maxLength={50} required />
             {errors.name && <p className="text-xs text-[#C0392B] -mt-3 mb-3">{errors.name}</p>}
             <p className="text-[10px] text-[#9C836A] mb-4">{lang === 'en' ? 'Letters, numbers, spaces allowed. 3-50 characters.' : 'ፊደላት፣ ቁጥሮች፣ ክፍተቶች ይፈቀዳሉ።'}</p>
@@ -69,6 +110,20 @@ export const CreateCommunityPage: React.FC = () => {
             <PostFormField label="Description (English)" labelAm="መግለጫ (እንግሊዝኛ)" value={form.description} onChange={v => setForm({ ...form, description: v })} placeholder="What is this community about?" lang={lang} multiline maxLength={500} required />
             {errors.description && <p className="text-xs text-[#C0392B] -mt-3 mb-3">{errors.description}</p>}
             <PostFormField label="Description (Amharic) — optional" labelAm="መግለጫ (አማርኛ) — አማራጭ" value={form.descriptionAm} onChange={v => setForm({ ...form, descriptionAm: v })} placeholder="ይህ ማህበረሰብ ስለምን ነው?" lang={lang} multiline maxLength={500} required={false} />
+            <div className="mb-4">
+              <p className="text-xs font-bold text-[#9C836A] uppercase tracking-wide mb-2">{lang === 'en' ? 'COVER IMAGE (optional)' : 'የሽፋን ምስል (አማራጭ)'}</p>
+              {!bannerPreview ? (
+                <div onClick={() => document.getElementById('banner-upload')?.click()} className="border-2 border-dashed border-[#DDD0BE] rounded-lg p-6 text-center hover:border-[#A8692A] cursor-pointer transition-colors">
+                  <p className="text-sm text-[#9C836A]">{lang === 'en' ? 'Click to upload a cover image' : 'የሽፋን ምስል ለመጫን ጠቅ ያድርጉ'}</p>
+                </div>
+              ) : (
+                <div className="relative rounded-lg overflow-hidden border border-[#DDD0BE] h-32">
+                  <img src={bannerPreview} alt="" className="w-full h-full object-cover" />
+                  <button onClick={() => { setBannerPreview(''); setBannerFile(null); }} className="absolute top-2 right-2 bg-[#1A0F00]/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
+                </div>
+              )}
+              <input id="banner-upload" type="file" accept="image/*" onChange={handleBannerSelect} className="hidden" />
+            </div>
           </div>
 
           <div className="bg-white border border-[#DDD0BE] rounded-[9px] p-6 mb-4">

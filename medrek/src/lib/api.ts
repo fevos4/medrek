@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function getHeaders() {
   const token = localStorage.getItem('medrek_token')
@@ -44,6 +44,7 @@ export function mapPost(post: any) {
     isSensitive: false,
     userVote: (post.userVote || 0) as 1 | -1 | 0,
     imageUrl: post.imageUrl || '',
+    videoUrl: post.videoUrl || '',
     type: post.type || 'text'
   }
 }
@@ -83,7 +84,10 @@ export function mapCommunity(community: any) {
     iconBg: iconColors[colorIndex],
     memberCount: community._count?.members || community.memberCount || 0,
     isJoined: community.isJoined || false,
-    isMuted: community.isMuted || false
+    isMuted: community.isMuted || false,
+    iconUrl: community.iconUrl || '',
+    bannerUrl: community.bannerUrl || '',
+    emoji: community.emoji || '',
   }
 }
 
@@ -108,6 +112,9 @@ export function mapCommunityDetail(community: any) {
     createdAt: new Date(community.createdAt).toLocaleDateString(),
     type: community.type || 'public',
     isMuted: community.isMuted || false,
+    iconUrl: community.iconUrl || '',
+    bannerUrl: community.bannerUrl || '',
+    emoji: community.emoji || '',
     moderators: [],
     rules: (community.rules || []).map((r: any) => ({
       id: r.id,
@@ -159,7 +166,7 @@ export const communitiesAPI = {
     const res = await fetch(`${BASE_URL}/api/communities/${id}`, { headers: getHeaders() })
     return handleResponse(res)
   },
-  create: async (body: { name: string; nameAm?: string; description: string; descriptionAm?: string; type: string; isSensitive: boolean; rules: { text: string; textAm?: string }[] }) => {
+  create: async (body: { name: string; nameAm?: string; description: string; descriptionAm?: string; type: string; isSensitive: boolean; rules: { text: string; textAm?: string }[]; iconUrl?: string; bannerUrl?: string; emoji?: string }) => {
     const res = await fetch(`${BASE_URL}/api/communities`, {
       method: 'POST', headers: getHeaders(), body: JSON.stringify(body)
     })
@@ -194,6 +201,12 @@ export const communitiesAPI = {
       method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify({ isMuted })
+    })
+    return handleResponse(res)
+  },
+  update: async (id: string, body: { iconUrl?: string; bannerUrl?: string; emoji?: string; description?: string; descriptionAm?: string; type?: string; isSensitive?: boolean }) => {
+    const res = await fetch(`${BASE_URL}/api/communities/${id}`, {
+      method: 'PATCH', headers: getHeaders(), body: JSON.stringify(body)
     })
     return handleResponse(res)
   }

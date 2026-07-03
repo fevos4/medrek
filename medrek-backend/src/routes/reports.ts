@@ -67,6 +67,37 @@ router.post('/', protect, async (req: any, res: any) => {
       }
     }
 
+    // Notify target creator about the report
+    if (targetType === 'post') {
+      const post = await prisma.post.findUnique({ where: { id: targetId }, select: { authorId: true, communityId: true } })
+      if (post && post.authorId !== req.user.id) {
+        await prisma.notification.create({
+          data: {
+            type: 'report',
+            content: 'Your post has been reported',
+            link: '/post/' + targetId,
+            userId: post.authorId
+          }
+        })
+        // Also notify community moderators/admins
+        const mods = await prisma.communityMember.findMany({
+          where: { communityId: post.communityId, role: { in: ['moderator', 'admin'] } }
+        })
+        for (const mod of mods) {
+          if (mod.userId !== req.user.id) {
+            await prisma.notification.create({
+              data: {
+                type: 'report',
+                content: 'A new report was submitted in your community',
+                link: '/mod/dashboard?community=' + post.communityId,
+                userId: mod.userId
+              }
+            })
+          }
+        }
+      }
+    }
+
     res.status(201).json({ message: 'Report submitted' })
   } catch (err) {
     console.error(err)

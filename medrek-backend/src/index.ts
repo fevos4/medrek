@@ -40,6 +40,13 @@ app.use((req: any, res: any, next: any) => {
 
 app.use(express.json())
 
+// Prisma warmup for cold starts
+const { prisma } = require('./lib/prisma')
+
+app.get('/api/health', (req: any, res: any) => {
+  res.json({ status: 'Medrek API is running' })
+})
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -59,10 +66,6 @@ app.use('/api/upload', require('./routes/upload'))
 app.use('/api/stats', require('./routes/stats'))
 app.use('/api/users', require('./routes/users'))
 app.use('/uploads', express.static(require('path').join(__dirname, '../uploads')))
-
-app.get('/api/health', (req: any, res: any) => {
-  res.json({ status: 'Medrek API is running' })
-})
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {

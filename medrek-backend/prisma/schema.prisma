@@ -44,6 +44,9 @@ model Community {
   descriptionAm String?
   type          String   @default("public") // public | private | restricted
   isSensitive   Boolean  @default(false)
+  iconUrl       String?
+  bannerUrl     String?
+  emoji         String?
   memberCount   Int      @default(0)
   creatorId     String
   createdAt     DateTime @default(now())

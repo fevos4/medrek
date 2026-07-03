@@ -10,10 +10,10 @@ import { CommunityAboutCard } from '../components/community/CommunityAboutCard';
 import { CommunityRulesCard } from '../components/community/CommunityRulesCard';
 import { SensitiveWarningModal } from '../components/ui/SensitiveWarningModal';
 import { Button } from '../components/ui/Button';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { communitiesAPI, postsAPI, votesAPI } from '../lib/api';
 import { mapCommunityDetail, mapPost } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { CreatePostBar } from '../components/feed/CreatePostBar';
 
 export const CommunityPage: React.FC = () => {
   const navigate = useNavigate();
@@ -93,9 +93,7 @@ export const CommunityPage: React.FC = () => {
     return (
       <div className="flex flex-col h-screen font-sans bg-[#F2E9DF] overflow-y-auto">
         <Navbar lang={lang} onToggleLang={() => setLang(l => l === 'en' ? 'am' : 'en')} />
-        <div className="flex items-center justify-center py-16">
-          <div className="text-[#9C836A] text-sm">{lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'}</div>
-        </div>
+        <LoadingSpinner text={lang === 'en' ? 'Loading...' : 'በመጫን ላይ...'} />
       </div>
     );
   }
@@ -124,9 +122,11 @@ export const CommunityPage: React.FC = () => {
         lang={lang}
         onJoin={handleJoin}
         onLeave={handleLeave}
+        isOwner={user?.id === communityDetail.creatorId}
+        isModOrAdmin={communityDetail.userRole === 'admin' || communityDetail.userRole === 'moderator'}
       />
       <div className="sticky top-14 z-10">
-        <FeedSortBar activeSort={activeSort} onSortChange={setActiveSort} lang={lang} />
+        <FeedSortBar activeSort={activeSort} onSortChange={setActiveSort} lang={lang} communityId={communityId} />
       </div>
       <div className="flex flex-1">
         <div className="hidden md:block w-[196px] flex-shrink-0 sticky top-14 self-start max-h-[calc(100vh-3.5rem)] overflow-y-auto border-r border-[#DDD0BE] bg-[#FAF4EC]">
@@ -137,7 +137,6 @@ export const CommunityPage: React.FC = () => {
         </div>
         <main className="flex-1 p-3 flex justify-center">
           <div className="w-full max-w-[640px]">
-              {isLoggedIn && <CreatePostBar userInitials={user?.username?.slice(0, 2).toUpperCase() || '??'} lang={lang} communityId={communityId} />}
               {posts.length > 0 ? (
                 <div className="flex flex-col gap-2 mt-3">
                   {posts.map(post => (

@@ -32,8 +32,8 @@ export const CommunitySelector: React.FC<CommunitySelectorProps> = ({ communitie
         <div className="flex items-center gap-3">
           {selected ? (
             <>
-              <div className="w-6 h-6 rounded flex items-center justify-center text-xs" style={{ backgroundColor: selected.iconBg }}>
-                {selected.icon}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden" style={{ backgroundColor: selected.iconBg }}>
+                {selected.iconUrl ? <img src={selected.iconUrl} alt="" className="w-full h-full object-cover" /> : selected.icon}
               </div>
               <div>
                 <span className="text-sm font-semibold text-[#1A0F00]">{selected.name}</span>
@@ -54,8 +54,8 @@ export const CommunitySelector: React.FC<CommunitySelectorProps> = ({ communitie
               onClick={() => { onSelect(c.id); setIsOpen(false); }}
               className="px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-[#F2E0C8]"
             >
-              <div className="w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0" style={{ backgroundColor: c.iconBg }}>
-                {c.icon}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden" style={{ backgroundColor: c.iconBg }}>
+                {c.iconUrl ? <img src={c.iconUrl} alt="" className="w-full h-full object-cover" /> : c.icon}
               </div>
               <div className="flex-1">
                 <span className="text-xs font-semibold text-[#1A0F00]">{c.name}</span>

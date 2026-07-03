@@ -102,7 +102,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ lang
                   <span className="text-sm mt-0.5">
                     {n.type === 'join_group' ? '👥' : 
                      n.type === 'reply_post' || n.type === 'reply_comment' ? '💬' : 
-                     n.type === 'mod_action' ? '🛡️' : '🔔'}
+                     n.type === 'mod_action' ? '🛡️' : 
+                     n.type === 'report' ? '🚩' : '🔔'}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs ${n.isRead ? 'text-[#5C4A32]' : 'text-[#1A0F00] font-semibold'}`}>{n.content}</p>

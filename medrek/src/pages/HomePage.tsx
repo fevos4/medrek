@@ -4,10 +4,10 @@ import type { Language, SortOption, Post } from '../types';
 import { Navbar } from '../components/layout/Navbar';
 import { LeftSidebar } from '../components/layout/LeftSidebar';
 import { RightSidebar } from '../components/layout/RightSidebar';
-import { CreatePostBar } from '../components/feed/CreatePostBar';
 import { FeedSortBar } from '../components/feed/FeedSortBar';
 import { PostCard } from '../components/post/PostCard';
 import { CrossDivider } from '../components/ui/CrossDivider';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { postsAPI, votesAPI } from '../lib/api';
 import { mapPost } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -71,9 +71,7 @@ export const HomePage: React.FC = () => {
     return (
       <div className="flex flex-col h-screen font-sans bg-[#F2E9DF] overflow-hidden">
         <Navbar lang={lang} onToggleLang={() => setLang(l => l === 'en' ? 'am' : 'en')} />
-        <div className="flex items-center justify-center py-16">
-          <div className="text-[#9C836A] text-sm">{lang === 'en' ? 'Loading feed...' : 'በመጫን ላይ...'}</div>
-        </div>
+        <LoadingSpinner text={lang === 'en' ? 'Loading feed...' : 'በመጫን ላይ...'} />
       </div>
     );
   }
@@ -95,8 +93,7 @@ export const HomePage: React.FC = () => {
         
         <main className="flex-1 overflow-y-auto p-3 flex justify-center">
           <div className="w-full max-w-[640px]">
-            {isLoggedIn && <CreatePostBar userInitials={user?.username?.slice(0, 2).toUpperCase() || 'FV'} lang={lang} />}
-            <FeedSortBar activeSort={activeSort} onSortChange={setActiveSort} lang={lang} />
+            {isLoggedIn && <FeedSortBar activeSort={activeSort} onSortChange={setActiveSort} lang={lang} />}
             
             {error ? (
               <div className="bg-white border border-[#DDD0BE] rounded-[9px] p-8 text-center mt-3">

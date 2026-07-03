@@ -28,7 +28,10 @@ router.get('/', optionalAuth, async (req: any, res: any) => {
     const result = communities.map((c: any) => ({
       ...c,
       isJoined: !!membershipMap[c.id],
-      userRole: membershipMap[c.id] || null
+      userRole: membershipMap[c.id] || null,
+      iconUrl: c.iconUrl || null,
+      bannerUrl: c.bannerUrl || null,
+      emoji: c.emoji || null
     }))
     res.json(result)
   } catch (err: any) {
@@ -118,7 +121,7 @@ router.get('/:id', optionalAuth, async (req: any, res: any) => {
 // POST /api/communities
 router.post('/', protect, async (req: any, res: any) => {
   try {
-    const { name, nameAm, description, descriptionAm, type, isSensitive, rules } = req.body
+    const { name, nameAm, description, descriptionAm, type, isSensitive, rules, iconUrl, bannerUrl, emoji } = req.body
 
     if (!name || name.length < 3 || name.length > 50) {
       return res.status(400).json({ message: 'Name is required, min 3 chars, max 50 chars' })
@@ -144,6 +147,9 @@ router.post('/', protect, async (req: any, res: any) => {
           descriptionAm: descriptionAm || null,
           type: type || 'public',
           isSensitive: isSensitive || false,
+          iconUrl: iconUrl || null,
+          bannerUrl: bannerUrl || null,
+          emoji: emoji || null,
           creatorId: req.user.id
         }
       })
@@ -215,6 +221,38 @@ router.post('/:id/join', protect, async (req: any, res: any) => {
     }
 
     res.json({ message: 'Joined successfully' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+})
+
+// PATCH /api/communities/:id - update community (icon, banner, etc)
+router.patch('/:id', protect, async (req: any, res: any) => {
+  try {
+    const membership = await prisma.communityMember.findUnique({
+      where: { userId_communityId: { userId: req.user.id, communityId: req.params.id } }
+    })
+    if (!membership || (membership.role !== 'admin' && membership.role !== 'moderator')) {
+      return res.status(403).json({ message: 'Not authorized' })
+    }
+
+    const { iconUrl, bannerUrl, emoji, description, descriptionAm, type, isSensitive } = req.body
+    const updateData: any = {}
+    if (iconUrl !== undefined) updateData.iconUrl = iconUrl
+    if (bannerUrl !== undefined) updateData.bannerUrl = bannerUrl
+    if (emoji !== undefined) updateData.emoji = emoji
+    if (description !== undefined) updateData.description = description
+    if (descriptionAm !== undefined) updateData.descriptionAm = descriptionAm
+    if (type !== undefined) updateData.type = type
+    if (isSensitive !== undefined) updateData.isSensitive = isSensitive
+
+    const community = await prisma.community.update({
+      where: { id: req.params.id },
+      data: updateData
+    })
+
+    res.json(community)
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'Server error' })

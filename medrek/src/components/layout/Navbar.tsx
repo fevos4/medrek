@@ -4,7 +4,7 @@ import type { Language } from '../../types';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../context/AuthContext';
-import { communitiesAPI } from '../../lib/api';
+import { communitiesAPI, mapCommunity } from '../../lib/api';
 import { NotificationDropdown } from './NotificationDropdown';
 
 interface NavbarProps {
@@ -19,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
   const { user, isLoggedIn, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moderatedComms, setModeratedComms] = useState<any[]>([]);
+  const [communities, setCommunities] = useState<any[]>([]);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -28,6 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
     } else {
       setModeratedComms([]);
     }
+    communitiesAPI.getAll().then((data: any) => setCommunities(data.map(mapCommunity))).catch(() => {});
   }, [isLoggedIn]);
 
   return (

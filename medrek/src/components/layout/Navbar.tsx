@@ -107,6 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
           )}
         </div>
         <div className="flex md:hidden items-center gap-2">
+          {isLoggedIn && <NotificationDropdown lang={lang} />}
           <LanguageToggle lang={lang} onToggle={onToggleLang} />
         </div>
       </nav>
@@ -128,6 +129,15 @@ export const Navbar: React.FC<NavbarProps> = ({ lang, onToggleLang, onLogin, onS
                 <div className="flex items-center gap-3 px-3 py-2.5 rounded-[7px] text-[#5C4A32] hover:bg-[#F2E0C8] cursor-pointer" onClick={() => { navigate('/guidelines'); setMenuOpen(false); }}>📋 <span className="text-sm">{lang === 'en' ? 'Guidelines' : 'መመሪያዎች'}</span></div>
                 <div className="flex items-center gap-3 px-3 py-2.5 rounded-[7px] text-[#5C4A32] hover:bg-[#F2E0C8] cursor-pointer" onClick={() => { navigate('/create-post'); setMenuOpen(false); }}>✏️ <span className="text-sm">{lang === 'en' ? 'Create Post' : 'ልጥፍ ጻፍ'}</span></div>
                 <div className="flex items-center gap-3 px-3 py-2.5 rounded-[7px] text-[#5C4A32] hover:bg-[#F2E0C8] cursor-pointer" onClick={() => { navigate('/create-community'); setMenuOpen(false); }}>➕ <span className="text-sm">{lang === 'en' ? 'Create Community' : 'ማህበረሰብ ፍጠር'}</span></div>
+              </div>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-[#9C836A] mb-3 mt-5">{lang === 'en' ? 'COMMUNITIES' : 'ማህበረሰቦች'}</p>
+              <div className="flex flex-col gap-1">
+                {communities.map(c => (
+                  <div key={c.id} className="flex items-center gap-3 px-3 py-2 rounded-[7px] text-[#5C4A32] hover:bg-[#F2E0C8] cursor-pointer" onClick={() => { navigate(`/community/${c.id}`); setMenuOpen(false); }}>
+                    <div className="w-5 h-5 rounded flex items-center justify-center text-[9px] flex-shrink-0" style={{ backgroundColor: c.iconBg }}>{c.icon}</div>
+                    <span className="text-sm">{c.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
             {/* Bottom section — profile & logout */}
